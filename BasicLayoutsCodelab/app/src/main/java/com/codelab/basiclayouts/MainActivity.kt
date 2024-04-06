@@ -21,105 +21,125 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddingFromBaseline
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.codelab.basiclayouts.components.AlignYourBodyElement
+import com.codelab.basiclayouts.components.AlignYourBodyRow
+import com.codelab.basiclayouts.components.FavoriteCollectionsGrid
+import com.codelab.basiclayouts.components.SearchTextField
+import com.codelab.basiclayouts.components.SootheBottomNavigation
+import com.codelab.basiclayouts.components.SootheNavigationRail
 import com.codelab.basiclayouts.ui.theme.MySootheTheme
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { MySootheApp() }
+        setContent {
+            val windowSizeClass = calculateWindowSizeClass(activity = this)
+            MySootheApp(windowSizeClass)
+        }
     }
-}
-
-// Step: Search bar - Modifiers
-@Composable
-fun SearchBar(
-    modifier: Modifier = Modifier
-) {
-    // Implement composable here
-}
-
-// Step: Align your body - Alignment
-@Composable
-fun AlignYourBodyElement(
-    modifier: Modifier = Modifier
-) {
-    // Implement composable here
-}
-
-// Step: Favorite collection card - Material Surface
-@Composable
-fun FavoriteCollectionCard(
-    modifier: Modifier = Modifier
-) {
-    // Implement composable here
-}
-
-// Step: Align your body row - Arrangements
-@Composable
-fun AlignYourBodyRow(
-    modifier: Modifier = Modifier
-) {
-    // Implement composable here
-}
-
-// Step: Favorite collections grid - LazyGrid
-@Composable
-fun FavoriteCollectionsGrid(
-    modifier: Modifier = Modifier
-) {
-    // Implement composable here
 }
 
 // Step: Home section - Slot APIs
 @Composable
 fun HomeSection(
-    modifier: Modifier = Modifier
+    @StringRes text: Int,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
 ) {
-    // Implement composable here
+    Column(modifier) {
+        Text(
+            text = stringResource(id = text),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .paddingFromBaseline(top = 40.dp, bottom = 16.dp)
+                .padding(horizontal = 16.dp)
+        )
+
+        content()
+    }
 }
 
 // Step: Home screen - Scrolling
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
-    // Implement composable here
+fun HomeScreen(
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.verticalScroll(rememberScrollState())
+    ) {
+        Spacer(Modifier.height(16.dp))
+        SearchTextField(Modifier.padding(horizontal = 16.dp))
+        HomeSection(text = R.string.align_your_body) {
+            AlignYourBodyRow()
+        }
+        HomeSection(text = R.string.favorite_collections) {
+            FavoriteCollectionsGrid()
+        }
+        Spacer(Modifier.height(16.dp))
+    }
 }
 
-// Step: Bottom navigation - Material
-@Composable
-private fun SootheBottomNavigation(modifier: Modifier = Modifier) {
-    // Implement composable here
-}
-
-// Step: MySoothe App - Scaffold
 @Composable
 fun MySootheAppPortrait() {
-    // Implement composable here
-}
-
-// Step: Bottom navigation - Material
-@Composable
-private fun SootheNavigationRail(modifier: Modifier = Modifier) {
-    // Implement composable here
+    MySootheTheme {
+        Scaffold(
+            bottomBar = { SootheBottomNavigation() }
+        ) { padding ->
+            HomeScreen(Modifier.padding(padding))
+        }
+    }
 }
 
 // Step: Landscape Mode
 @Composable
-fun MySootheAppLandscape(){
-    // Implement composable here
+fun MySootheAppLandscape() {
+    MySootheTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Row {
+                SootheNavigationRail()
+                HomeScreen()
+            }
+        }
+    }
 }
 
 // Step: MySoothe App
 @Composable
-fun MySootheApp() {
-    // Implement composable here
+fun MySootheApp(windowSize: WindowSizeClass) {
+    when(windowSize.widthSizeClass) {
+        WindowWidthSizeClass.Compact -> {
+            MySootheAppPortrait()
+        }
+        WindowWidthSizeClass.Expanded -> {
+            MySootheAppLandscape()
+        }
+    }
 }
 
-private val alignYourBodyData = listOf(
+val alignYourBodyData = listOf(
     R.drawable.ab1_inversions to R.string.ab1_inversions,
     R.drawable.ab2_quick_yoga to R.string.ab2_quick_yoga,
     R.drawable.ab3_stretching to R.string.ab3_stretching,
@@ -128,7 +148,7 @@ private val alignYourBodyData = listOf(
     R.drawable.ab6_pre_natal_yoga to R.string.ab6_pre_natal_yoga
 ).map { DrawableStringPair(it.first, it.second) }
 
-private val favoriteCollectionsData = listOf(
+val favoriteCollectionsData = listOf(
     R.drawable.fc1_short_mantras to R.string.fc1_short_mantras,
     R.drawable.fc2_nature_meditations to R.string.fc2_nature_meditations,
     R.drawable.fc3_stress_and_anxiety to R.string.fc3_stress_and_anxiety,
@@ -137,7 +157,7 @@ private val favoriteCollectionsData = listOf(
     R.drawable.fc6_nightly_wind_down to R.string.fc6_nightly_wind_down
 ).map { DrawableStringPair(it.first, it.second) }
 
-private data class DrawableStringPair(
+data class DrawableStringPair(
     @DrawableRes val drawable: Int,
     @StringRes val text: Int
 )
@@ -145,27 +165,7 @@ private data class DrawableStringPair(
 @Preview(showBackground = true, backgroundColor = 0xFFF5F0EE)
 @Composable
 fun SearchBarPreview() {
-    MySootheTheme { SearchBar(Modifier.padding(8.dp)) }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFFF5F0EE)
-@Composable
-fun AlignYourBodyElementPreview() {
-    MySootheTheme {
-        AlignYourBodyElement(
-            modifier = Modifier.padding(8.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFFF5F0EE)
-@Composable
-fun FavoriteCollectionCardPreview() {
-    MySootheTheme {
-        FavoriteCollectionCard(
-            modifier = Modifier.padding(8.dp)
-        )
-    }
+    MySootheTheme { SearchTextField(Modifier.padding(8.dp)) }
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFF5F0EE)
@@ -183,10 +183,14 @@ fun AlignYourBodyRowPreview() {
 @Preview(showBackground = true, backgroundColor = 0xFFF5F0EE)
 @Composable
 fun HomeSectionPreview() {
-    MySootheTheme { HomeSection() }
+    MySootheTheme {
+        HomeSection(R.string.align_your_body) {
+            AlignYourBodyRow()
+        }
+    }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFFF5F0EE)
+@Preview(showBackground = true, backgroundColor = 0xFFF5F0EE, heightDp = 180)
 @Composable
 fun ScreenContentPreview() {
     MySootheTheme { HomeScreen() }
